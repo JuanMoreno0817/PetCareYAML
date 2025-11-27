@@ -1,0 +1,51 @@
+name: CI-CD Backend (.NET 6)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+env:
+  DOTNET_VERSION: '6.0'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 6
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore ./PetCare-BE/PetCareWebAPI/PetCareWebAPI.csproj
+
+      - name: Build backend
+        run: dotnet build ./PetCare-BE/PetCareWebAPI/PetCareWebAPI.csproj --configuration Release --no-restore
+
+      - name: Publish backend
+        run: dotnet publish ./PetCare-BE/PetCareWebAPI/PetCareWebAPI.csproj -c Release -o ./artifacts/backend
+
+      - name: Upload backend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: petcare-backend
+          path: ./artifacts/backend
+
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: petcare-backend
+          path: ./artifacts/backend
