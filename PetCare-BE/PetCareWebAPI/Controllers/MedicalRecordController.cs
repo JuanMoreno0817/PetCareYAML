@@ -17,7 +17,10 @@ namespace PetCareWebAPI.Controllers
         {
             _context = context;
         }
-
+        /// <summary> 
+        /// Trae lo registros medicos
+        /// </summary> 
+        /// <returns>MedicalRecord</returns>
         [Authorize(Policy = "Admin")]
         [HttpGet, ActionName("Get")]
         [Route("GetMedicalRecords")]
